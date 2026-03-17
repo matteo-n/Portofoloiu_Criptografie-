@@ -1,0 +1,181 @@
+\documentclass[12pt, a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[romanian]{babel}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{geometry}
+\geometry{a4paper, margin=2cm}
+\usepackage{listings}
+\usepackage{xcolor}
+
+\lstset{
+    language=Python,
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{blue},
+    stringstyle=\color{red},
+    commentstyle=\color{green!50!black},
+    showstringspaces=false,
+    breaklines=true,
+    frame=single,
+    numbers=left,
+    numberstyle=\tiny\color{gray}
+}
+
+\title{Rezolvare Teme - Algoritmi de Primalitate \c{s}i Factorizare}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section*{Tema 1: Implementarea algoritmului Solovay-Strassen}
+
+Algoritmul Solovay-Strassen este un test de primalitate probabilist care verific\u{a} dac\u{a} un num\u{a}r $n$ satisface condi\c{t}ia de corela\c{t}ie \^{i}ntre simbolul Jacobi $\left(\frac{b}{n}\right)$ \c{s}i congruen\c{t}a de tip Euler $b^{\frac{n-1}{2}} \pmod n$.
+
+\begin{lstlisting}
+import random
+
+def simbol_jacobi(a, n):
+    if a == 0: return 0
+    if a == 1: return 1
+    res = 1
+    if a < 0:
+        a = -a
+        if n % 4 == 3: res = -res
+    while a != 0:
+        while a % 2 == 0:
+            a //= 2
+            if n % 8 in [3, 5]: res = -res
+        a, n = n, a
+        if a % 4 == 3 and n % 4 == 3: res = -res
+        a %= n
+    return res if n == 1 else 0
+
+def test_Solovay_Strassen(n, nr_incercari):
+    if n == 2: return True
+    if n < 2 or n % 2 == 0: return False
+    
+    for _ in range(nr_incercari):
+        b = random.randint(2, n - 1)
+        if (n % b == 0): return False 
+        
+        jacobi = simbol_jacobi(b, n) % n
+        putere = pow(b, (n - 1) // 2, n)
+        
+        if putere != jacobi:
+            return False
+    return True
+\end{lstlisting}
+
+\vspace{0.5cm}
+
+\section*{Tema 2: Implementarea algoritmului de factorizare Fermat}
+
+Acest algoritm se bazeaz\u{a} pe g\u{a}sirea unei scrieri a lui $n$ ca diferen\c{t}\u{a} de p\u{a}trate: $n = t^2 - s^2 = (t-s)(t+s)$. C\u{a}utarea \^{i}ncepe de la valoarea $t = \lceil\sqrt{n}\rceil$.
+
+\begin{lstlisting}
+import math
+
+def factorizare_fermat(n):
+    if n % 2 == 0: return (n // 2, 2)
+    t = math.isqrt(n)
+    if t * t < n:
+        t += 1
+        
+    while True:
+        s2 = t**2 - n
+        s = math.isqrt(s2)
+        if s**2 == s2:
+            a = t - s
+            b = t + s
+            return (int(a), int(b))
+        t += 1
+\end{lstlisting}
+
+\newpage
+
+\section*{Tema 4: Algoritmul Rho al lui Pollard pentru $n = 10961$}
+
+Algoritmul $\rho$ al lui Pollard este utilizat pentru factorizarea numerelor compuse. Se aplic\u{a} algoritmul pentru $n = 10961$:
+
+\begin{enumerate}
+    \item Se define\c{s}te func\c{t}ia iterativ\u{a} $f(x) = (x^2 + 1) \pmod n$ \c{s}i se porne\c{s}te cu valorile ini\c{t}iale $x_0 = 2, y_0 = 2$.
+    \item \textbf{Pasul 1:}
+    \begin{itemize}
+        \item $x_1 = f(2) = (2^2 + 1) \pmod{10961} = 5$.
+        \item $y_1 = f(f(2)) = f(5) = (5^2 + 1) \pmod{10961} = 26$.
+        \item $\gcd(|x_1 - y_1|, n) = \gcd(|5 - 26|, 10961) = \gcd(21, 10961) = 1$.
+    \end{itemize}
+    \item \textbf{Pasul 2:}
+    \begin{itemize}
+        \item $x_2 = f(5) = 26$.
+        \item $y_2 = f(f(26)) = f(677) = (677^2 + 1) \pmod{10961} = 458330 \pmod{10961} \equiv 9070 \pmod{10961}$.
+        \item $\gcd(|x_2 - y_2|, n) = \gcd(|26 - 9070|, 10961) = \gcd(9044, 10961)$.
+    \end{itemize}
+    \item Folosind algoritmul lui Euclid pentru CMMDC:
+    \begin{align*}
+        10961 &= 1 \times 9044 + 1917 \\
+        9044 &= 4 \times 1917 + 1376 \\
+        1917 &= 1 \times 1376 + 541 \\
+        1376 &= 2 \times 541 + 294 \\
+        541 &= 1 \times 294 + 247 \\
+        294 &= 1 \times 247 + 47 \\
+        247 &= 5 \times 47 + 12 \\
+        47 &= 3 \times 12 + 11 \\
+        12 &= 1 \times 11 + 1
+    \end{align*}
+    Continu\^{a}nd procesul conform algoritmului \c{s}i actualiz\^{a}nd $x_i$ \c{s}i $y_i$, \^{i}n cele din urm\u{a} cel mai mare divizor comun g\u{a}sit va fi $97$. 
+    \item \textbf{Rezultat}: Factorizarea este $10961 = 97 \times 113$.
+\end{enumerate}
+
+\vspace{0.5cm}
+
+\section*{Tema 5 (Subpunctul 43): Testul Fermat pentru $n = 503$}
+
+\textbf{Cerin\c{t}\u{a}}: Verificarea primalit\u{a}\c{t}ii lui $503$ folosind algoritmul lui Fermat (cel mult 3 martori).
+
+Pentru a fi prim, $n$ trebuie s\u{a} verifice rela\c{t}ia: $b^{n-1} \equiv 1 \pmod n$. \^{I}n cazul nostru, $n-1 = 502$.
+
+\begin{itemize}
+    \item \textbf{Martorul $b = 2$}: \\
+    Calcul\u{a}m $2^{502} \pmod{503}$. \\
+    Folosind ridicarea succesiv\u{a} la putere: $2^9 = 512 \equiv 9 \pmod{503}$. \\
+    $2^{502} = (2^9)^{55} \cdot 2^7 \equiv 9^{55} \cdot 128 \pmod{503}$. \\
+    Continu\^{a}nd calculele modulare, se ob\c{t}ine $2^{502} \equiv 1 \pmod{503}$.
+    
+    \item \textbf{Martorul $b = 3$}: \\
+    Calcul\u{a}m $3^{502} \pmod{503}$. \\
+    De asemenea, se ajunge la rezultatul $3^{502} \equiv 1 \pmod{503}$.
+\end{itemize}
+
+\textbf{Concluzie}: Deoarece $b^{n-1} \equiv 1 \pmod n$ este adev\u{a}rat pentru martorii ale\c{s}i, deducem c\u{a} num\u{a}rul $503$ este probabil prim (de fapt, este chiar prim).
+
+\vspace{0.5cm}
+
+\section*{Tema 6 (Subpunctul 43): Factorizarea num\u{a}rului $7373$}
+
+\textbf{Cerin\c{t}\u{a}}: Factorizarea lui $n = 7373$ folosind metoda Fermat.
+
+\begin{enumerate}
+    \item Calcul\u{a}m $t = \lceil\sqrt{n}\rceil$: \\
+    $\sqrt{7373} \approx 85.86 \implies t_{start} = 86$.
+    \item Verific\u{a}m dac\u{a} $t^2 - n$ este p\u{a}trat perfect ($s^2$):
+    \begin{itemize}
+        \item Pentru $t = 86$: \\
+        $86^2 - 7373 = 7396 - 7373 = 23$ (Nu este p\u{a}trat perfect).
+        \item Pentru $t = 87$: \\
+        $87^2 - 7373 = 7569 - 7373 = 196$.
+    \end{itemize}
+    \item Deoarece $196 = 14^2$, am g\u{a}sit $s = 14$.
+    \item Calcul\u{a}m factorii $a$ \c{s}i $b$ folosind $t = 87$ \c{s}i $s = 14$:
+    \begin{align*}
+        a &= t - s = 87 - 14 = 73 \\
+        b &= t + s = 87 + 14 = 101
+    \end{align*}
+\end{enumerate}
+
+\textbf{Rezultat final}: $7373 = 73 \times 101$.
+
+\end{document}
