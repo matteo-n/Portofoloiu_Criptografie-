@@ -1,0 +1,56 @@
+\documentclass[12pt, a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[romanian]{babel}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{geometry}
+\geometry{a4paper, margin=2cm}
+\usepackage{listings}
+\usepackage{xcolor}
+
+\lstset{
+    language=Python,
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{blue},
+    stringstyle=\color{red},
+    commentstyle=\color{green!50!black},
+    showstringspaces=false,
+    breaklines=true,
+    frame=single,
+    numbers=left,
+    numberstyle=\tiny\color{gray}
+}
+
+\title{Rezolvare Teme - Algoritmi de Primalitate \c{s}i Factorizare}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+\section*{Tema 6 (Subpunctul 43): Factorizarea num\u{a}rului $7373$}
+
+\textbf{Cerin\c{t}\u{a}}: Factorizarea lui $n = 7373$ folosind metoda Fermat.
+
+\begin{enumerate}
+    \item Calcul\u{a}m $t = \lceil\sqrt{n}\rceil$: \\
+    $\sqrt{7373} \approx 85.86 \implies t_{start} = 86$.
+    \item Verific\u{a}m dac\u{a} $t^2 - n$ este p\u{a}trat perfect ($s^2$):
+    \begin{itemize}
+        \item Pentru $t = 86$: \\
+        $86^2 - 7373 = 7396 - 7373 = 23$ (Nu este p\u{a}trat perfect).
+        \item Pentru $t = 87$: \\
+        $87^2 - 7373 = 7569 - 7373 = 196$.
+    \end{itemize}
+    \item Deoarece $196 = 14^2$, am g\u{a}sit $s = 14$.
+    \item Calcul\u{a}m factorii $a$ \c{s}i $b$ folosind $t = 87$ \c{s}i $s = 14$:
+    \begin{align*}
+        a &= t - s = 87 - 14 = 73 \\
+        b &= t + s = 87 + 14 = 101
+    \end{align*}
+    \end{enumerate}
+
+\textbf{Rezultat final}: $7373 = 73 \times 101$.
+
+
+\end{document}

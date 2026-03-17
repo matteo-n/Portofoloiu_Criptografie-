@@ -1,0 +1,55 @@
+\documentclass[12pt, a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[romanian]{babel}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{geometry}
+\geometry{a4paper, margin=2cm}
+\usepackage{listings}
+\usepackage{xcolor}
+
+\lstset{
+    language=Python,
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{blue},
+    stringstyle=\color{red},
+    commentstyle=\color{green!50!black},
+    showstringspaces=false,
+    breaklines=true,
+    frame=single,
+    numbers=left,
+    numberstyle=\tiny\color{gray}
+}
+
+\title{Rezolvare Teme - Algoritmi de Primalitate \c{s}i Factorizare}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle  
+
+\section*{Tema 2: Implementarea algoritmului de factorizare Fermat}
+
+Acest algoritm se bazeaz\u{a} pe g\u{a}sirea unei scrieri a lui $n$ ca diferen\c{t}\u{a} de p\u{a}trate: $n = t^2 - s^2 = (t-s)(t+s)$. C\u{a}utarea \^{i}ncepe de la valoarea $t = \lceil\sqrt{n}\rceil$.
+
+\begin{lstlisting}
+import math
+
+def factorizare_fermat(n):
+    if n % 2 == 0: return (n // 2, 2)
+    t = math.isqrt(n)
+    if t * t < n:
+        t += 1
+        
+    while True:
+        s2 = t**2 - n
+        s = math.isqrt(s2)
+        if s**2 == s2:
+            a = t - s
+            b = t + s
+            return (int(a), int(b))
+        t += 1
+\end{lstlisting}
+
+\end{document}

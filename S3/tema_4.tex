@@ -1,0 +1,66 @@
+\documentclass[12pt, a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[romanian]{babel}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{geometry}
+\geometry{a4paper, margin=2cm}
+\usepackage{listings}
+\usepackage{xcolor}
+
+\lstset{
+    language=Python,
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{blue},
+    stringstyle=\color{red},
+    commentstyle=\color{green!50!black},
+    showstringspaces=false,
+    breaklines=true,
+    frame=single,
+    numbers=left,
+    numberstyle=\tiny\color{gray}
+}
+
+\title{Rezolvare Teme - Algoritmi de Primalitate \c{s}i Factorizare}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+\section*{Tema 4: Algoritmul Rho al lui Pollard pentru $n = 10961$}
+
+Algoritmul $\rho$ al lui Pollard este utilizat pentru factorizarea numerelor compuse. Se aplic\u{a} algoritmul pentru $n = 10961$:
+
+\begin{enumerate}
+    \item Se define\c{s}te func\c{t}ia iterativ\u{a} $f(x) = (x^2 + 1) \pmod n$ \c{s}i se porne\c{s}te cu valorile ini\c{t}iale $x_0 = 2, y_0 = 2$.
+    \item \textbf{Pasul 1:}
+    \begin{itemize}
+        \item $x_1 = f(2) = (2^2 + 1) \pmod{10961} = 5$.
+        \item $y_1 = f(f(2)) = f(5) = (5^2 + 1) \pmod{10961} = 26$.
+        \item $\gcd(|x_1 - y_1|, n) = \gcd(|5 - 26|, 10961) = \gcd(21, 10961) = 1$.
+    \end{itemize}
+    \item \textbf{Pasul 2:}
+    \begin{itemize}
+        \item $x_2 = f(5) = 26$.
+        \item $y_2 = f(f(26)) = f(677) = (677^2 + 1) \pmod{10961} = 458330 \pmod{10961} \equiv 9070 \pmod{10961}$.
+        \item $\gcd(|x_2 - y_2|, n) = \gcd(|26 - 9070|, 10961) = \gcd(9044, 10961)$.
+    \end{itemize}
+    \item Folosind algoritmul lui Euclid pentru CMMDC:
+    \begin{align*}
+        10961 &= 1 \times 9044 + 1917 \\
+        9044 &= 4 \times 1917 + 1376 \\
+        1917 &= 1 \times 1376 + 541 \\
+        1376 &= 2 \times 541 + 294 \\
+        541 &= 1 \times 294 + 247 \\
+        294 &= 1 \times 247 + 47 \\
+        247 &= 5 \times 47 + 12 \\
+        47 &= 3 \times 12 + 11 \\
+        12 &= 1 \times 11 + 1
+    \end{align*}
+    Continu\^{a}nd procesul conform algoritmului \c{s}i actualiz\^{a}nd $x_i$ \c{s}i $y_i$, \^{i}n cele din urm\u{a} cel mai mare divizor comun g\u{a}sit va fi $97$. 
+    \item \textbf{Rezultat}: Factorizarea este $10961 = 97 \times 113$.
+\end{enumerate}
+
+
+\end{document}

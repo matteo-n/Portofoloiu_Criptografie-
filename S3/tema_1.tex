@@ -1,0 +1,73 @@
+\documentclass[12pt, a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[romanian]{babel}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{geometry}
+\geometry{a4paper, margin=2cm}
+\usepackage{listings}
+\usepackage{xcolor}
+
+\lstset{
+    language=Python,
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{blue},
+    stringstyle=\color{red},
+    commentstyle=\color{green!50!black},
+    showstringspaces=false,
+    breaklines=true,
+    frame=single,
+    numbers=left,
+    numberstyle=\tiny\color{gray}
+}
+
+
+\title{Rezolvare Teme - Algoritmi de Primalitate \c{s}i Factorizare}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section*{Tema 1: Implementarea algoritmului Solovay-Strassen}
+
+Algoritmul Solovay-Strassen este un test de primalitate probabilist care verific\u{a} dac\u{a} un num\u{a}r $n$ satisface condi\c{t}ia de corela\c{t}ie \^{i}ntre simbolul Jacobi $\left(\frac{b}{n}\right)$ \c{s}i congruen\c{t}a de tip Euler $b^{\frac{n-1}{2}} \pmod n$.
+
+\begin{lstlisting}
+import random
+
+def simbol_jacobi(a, n):
+    if a == 0: return 0
+    if a == 1: return 1
+    res = 1
+    if a < 0:
+        a = -a
+        if n % 4 == 3: res = -res
+    while a != 0:
+        while a % 2 == 0:
+            a //= 2
+            if n % 8 in [3, 5]: res = -res
+        a, n = n, a
+        if a % 4 == 3 and n % 4 == 3: res = -res
+        a %= n
+    return res if n == 1 else 0
+
+def test_Solovay_Strassen(n, nr_incercari):
+    if n == 2: return True
+    if n < 2 or n % 2 == 0: return False
+    
+    for _ in range(nr_incercari):
+        b = random.randint(2, n - 1)
+        if (n % b == 0): return False 
+        
+        jacobi = simbol_jacobi(b, n) % n
+        putere = pow(b, (n - 1) // 2, n)
+        
+        if putere != jacobi:
+            return False
+    return True
+\end{lstlisting}
+
+\end{document}

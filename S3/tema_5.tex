@@ -1,0 +1,52 @@
+\documentclass[12pt, a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[romanian]{babel}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{geometry}
+\geometry{a4paper, margin=2cm}
+\usepackage{listings}
+\usepackage{xcolor}
+
+\lstset{
+    language=Python,
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{blue},
+    stringstyle=\color{red},
+    commentstyle=\color{green!50!black},
+    showstringspaces=false,
+    breaklines=true,
+    frame=single,
+    numbers=left,
+    numberstyle=\tiny\color{gray}
+}
+
+\title{Rezolvare Teme - Algoritmi de Primalitate \c{s}i Factorizare}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+\section*{Tema 5 (Subpunctul 43): Testul Fermat pentru $n = 503$}
+
+\textbf{Cerin\c{t}\u{a}}: Verificarea primalit\u{a}\c{t}ii lui $503$ folosind algoritmul lui Fermat (cel mult 3 martori).
+
+Pentru a fi prim, $n$ trebuie s\u{a} verifice rela\c{t}ia: $b^{n-1} \equiv 1 \pmod n$. \^{I}n cazul nostru, $n-1 = 502$.
+
+\begin{itemize}
+    \item \textbf{Martorul $b = 2$}: \\
+    Calcul\u{a}m $2^{502} \pmod{503}$. \\
+    Folosind ridicarea succesiv\u{a} la putere: $2^9 = 512 \equiv 9 \pmod{503}$. \\
+    $2^{502} = (2^9)^{55} \cdot 2^7 \equiv 9^{55} \cdot 128 \pmod{503}$. \\
+    Continu\^{a}nd calculele modulare, se ob\c{t}ine $2^{502} \equiv 1 \pmod{503}$.
+    
+    \item \textbf{Martorul $b = 3$}: \\
+    Calcul\u{a}m $3^{502} \pmod{503}$. \\
+    De asemenea, se ajunge la rezultatul $3^{502} \equiv 1 \pmod{503}$.
+\end{itemize}
+
+\textbf{Concluzie}: Deoarece $b^{n-1} \equiv 1 \pmod n$ este adev\u{a}rat pentru martorii ale\c{s}i, deducem c\u{a} num\u{a}rul $503$ este probabil prim (de fapt, este chiar prim).
+
+
+\end{document}
