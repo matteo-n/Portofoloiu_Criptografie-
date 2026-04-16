@@ -63,9 +63,9 @@ class MasseyOmura:
     def protocol(self, M: int, eA: int, eB: int):
         """
         Simuleaza protocolul complet in 3 pasi:
-          Pas 1: Alice trimite C1 = M^{eA} mod p
-          Pas 2: Bob   trimite C2 = C1^{eB} mod p = M^{eA*eB}
-          Pas 3: Alice trimite C3 = C2^{dA} mod p = M^{eB}
+          Pas 1: Alice -> Bob: C1 = M^{eA} mod p
+          Pas 2: Bob -> Alice: C2 = C1^{eB} mod p = M^{eA*eB}
+          Pas 3: Alice -> Bob: C3 = C2^{dA} mod p = M^{eB}
           Final: Bob   calculeaza M = C3^{dB} mod p
         """
         p = self.p
@@ -78,22 +78,22 @@ class MasseyOmura:
         print(f"  Mesaj original:   M = {M}")
         print("=" * 55)
         print(f"\n[Chei]")
-        print(f"  Alice: eA={eA}, dA={dA}  (eA*dA ≡ {(eA*dA) % (p-1)} mod {p-1})")
-        print(f"  Bob  : eB={eB}, dB={dB}  (eB*dB ≡ {(eB*dB) % (p-1)} mod {p-1})")
+        print(f"  Alice: eA={eA}, dA={dA}  (eA*dA == {(eA*dA) % (p-1)} mod {p-1})")
+        print(f"  Bob  : eB={eB}, dB={dB}  (eB*dB == {(eB*dB) % (p-1)} mod {p-1})")
 
-        # Pas 1: Alice → Bob
+        # Pas 1: Alice -> Bob
         C1 = self.encrypt(M, eA)
-        print(f"\n[Pas 1] Alice → Bob")
+        print(f"\n[Pas 1] Alice -> Bob")
         print(f"  C1 = M^eA mod p = {M}^{eA} mod {p} = {C1}")
 
-        # Pas 2: Bob → Alice
+        # Pas 2: Bob -> Alice
         C2 = self.encrypt(C1, eB)
-        print(f"\n[Pas 2] Bob → Alice")
+        print(f"\n[Pas 2] Bob -> Alice")
         print(f"  C2 = C1^eB mod p = {C1}^{eB} mod {p} = {C2}")
 
-        # Pas 3: Alice → Bob
+        # Pas 3: Alice -> Bob
         C3 = self.decrypt(C2, dA)
-        print(f"\n[Pas 3] Alice → Bob")
+        print(f"\n[Pas 3] Alice -> Bob")
         print(f"  C3 = C2^dA mod p = {C2}^{dA} mod {p} = {C3}")
 
         # Final: Bob decripteaza
@@ -101,7 +101,7 @@ class MasseyOmura:
         print(f"\n[Final] Bob decripteaza")
         print(f"  M  = C3^dB mod p = {C3}^{dB} mod {p} = {M_rec}")
 
-        ok = "✓ CORECT" if M_rec == M else "✗ EROARE"
+        ok = "[OK] CORECT" if M_rec == M else "[FAIL] EROARE"
         print(f"\n  Mesaj recuperat: {M_rec}  {ok}")
         print("=" * 55)
         return C1, C2, C3, M_rec
@@ -155,26 +155,53 @@ class DiffieHellman:
         print(f"  Alice: k = B^a mod p = {B}^{a} mod {p} = {kA}")
         print(f"  Bob  : k = A^b mod p = {A}^{b} mod {p} = {kB}")
 
-        ok = "✓ CORECT — chei identice!" if kA == kB else "✗ EROARE"
+        ok = "[OK] CORECT - chei identice!" if kA == kB else "[FAIL] EROARE"
         print(f"\n  Cheie secreta k = {kA}   {ok}")
         print("=" * 55)
         return A, B, kA
 
+
 # ─────────────────────────────────────────────────────────────
-# Demonstratie
+# Main - Teste
 # ─────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
-    # ── Massey-Omura ──────────────────────────────────────────
-    print("\n" + "█" * 55)
-    print("  DEMO MASSEY-OMURA")
-    print("█" * 55)
-    mo = MasseyOmura(p=31)
-    mo.protocol(M=13, eA=7, eB=11)
+    print("\n")
+    print("#" * 60)
+    print("#" + " " * 58 + "#")
+    print("#" + "  DEMONSTRATIE: MASSEY-OMURA SI DIFFIE-HELLMAN".center(58) + "#")
+    print("#" + " " * 58 + "#")
+    print("#" * 60)
+    
+    # ────────────────────────────────────────
+    # Test 1: Massey-Omura
+    # ────────────────────────────────────────
+    print("\n\n>>> TEST 1: CRIPTOSISTEMUL MASSEY-OMURA <<<\n")
+    
+    # Parametru prim
+    p = 62657
+    M = 31337  # Mesajul de criptat
+    eA = 17
+    eB = 19
+    
+    mo = MasseyOmura(p)
+    C1, C2, C3, M_rec = mo.protocol(M, eA, eB)
+    
+    # ────────────────────────────────────────
+    # Test 2: Diffie-Hellman
+    # ────────────────────────────────────────
+    print("\n\n>>> TEST 2: SCHIMBUL DE CHEI DIFFIE-HELLMAN <<<\n")
+    
+    # Parametri publici
+    p_dh = 62657
+    g = 2
+    
+    # Chei private
+    a = 41
+    b = 53
+    
+    dh = DiffieHellman(p_dh, g)
+    A, B, k = dh.protocol(a, b)
+    
+    print("\n\n[OK] Programul s-a executat cu succes!\n")
 
-    # ── Diffie-Hellman (problema din enunt) ───────────────────
-    print("\n" + "█" * 55)
-    print("  DEMO DIFFIE-HELLMAN  (p=17, g=5, a=3, b=6)")
-    print("█" * 55)
-    dh = DiffieHellman(p=17, g=5)
-    dh.protocol(a=3, b=6)
