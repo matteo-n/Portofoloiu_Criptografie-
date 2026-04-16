@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Implementare Criptosistemul Merkle-Hellman (Knapsack)
-Aplicare pentru mesaje cu alfabetul A-Z (26 caractere)
-"""
-
-# -*- coding: utf-8 -*-
 """
 Implementare Criptosistemul Merkle-Hellman (Knapsack)
 Aplicare pentru mesaje cu alfabetul A-Z (26 caractere)
@@ -103,10 +96,7 @@ def merkle_hellman_demo():
     print("=" * 70)
     print("CRIPTOSISTEMUL MERKLE-HELLMAN (KNAPSACK)")
     print("=" * 70)
-    
-    # --- SETARE PARAMETRI ---
-    # Secventa STRICT supercrescatoare (CHEIA PRIVATA)
-    # O secventa e supercrescatoare daca fiecare element e mai mare decat suma tuturor anterioare
+
     private_key = [2, 3, 6, 12, 24]  # 3>2, 6>2+3=5, 12>2+3+6=11, 24>2+3+6+12=23
     
     # Parametri de transformare: b si m
@@ -226,63 +216,6 @@ def explicatii():
     print("\n" + "=" * 70)
     print("EXPLICATII: CRIPTOSISTEMUL MERKLE-HELLMAN")
     print("=" * 70)
-    
-    print(f"""
-PRINCIPII FUNDAMENTALE:
-======================
-
-1. PROBLEME NP-HARD:
-   - Problema RUCSACULUI (Knapsack Problem) este NP-hard: gasirea
-     unui subset care se insumeaza la o valoare data e greu in general.
-   - BUT: Pentru secvente SUPERCRESCATOARE, solutia e unica si gasibile
-     eficient prin greedy (de la dreapta la stanga).
-
-2. CHEIE PRIVATA (SECRET):
-   - Secventa supercrescatoare: [2, 3, 6, 12, 24]
-   - Parametri a, b, m cu a*b ≡ 1 (mod m)
-   - m > suma(secventa) si gcd(a,m)=1
-
-3. CHEIE PUBLICA (PUBLICA):
-   - Transformata: B[i] = (a * S[i]) mod m
-   - Rezultat: [45, 41, 29, 5, 10]
-   - Problema rucsacului cu cheie publica e NP-hard!
-
-ALGORITMUL:
-===========
-
-GENERARE CHEI:
-  1. Alege secventa supercrescatoare S
-  2. Alege m > suma(S)
-  3. Alege a cu gcd(a,m)=1
-  4. Calculeaza b = a^(-1) mod m
-  5. Cheia publica: B[i] = (a*S[i]) mod m
-  6. Cheia privata: (S, a, m) SECRETA
-
-CRIPTARE:
-  1. Converteste mesaj M in bits
-  2. Ciphertext C = suma(bit_i * B[i])
-
-DECRIPTARE:
-  1. Calculeaza C' = C * b mod m
-  2. Rezolva problema rucsacului: care S[i] se insumeaza la C'
-     (solutie unica si rapida cu secventa supercrescatoare)
-  3. Recupereaza bitii mesajului original
-
-EXEMPLU (messaggiu "WHY"):
-  W = cod 22 = 01101 (binar)
-  - Criptare: 0*45 + 1*41 + 1*29 + 0*5 + 1*10 = 80
-  - Decriptare: 80*13 mod 53 = 33
-                33 = 3 + 6 + 24 -> bits [0,1,1,0,1] -> W ✓
-
-SECURITATE:
-  - Cine are cheie publica: nu poate decripta (problema rucsacului e hard)
-  - Cine are cheie privata: poate decripta rapid (secventa supercrescatoare)
-  - Atacuri cunoscute: cautare exhaustiva, cracking pe cheia publica,
-    algoritmi genetici - dar pentru parametri mari e INTRACTABIL
-
-""")
-    print("=" * 70)
-
 
 if __name__ == "__main__":
     # Demonstratie cu mesajul din cerinta
@@ -290,7 +223,4 @@ if __name__ == "__main__":
     
     # Explicatii detaliate
     explicatii()
-    
-    # Optiune: Criptare personalizata
-    # Decomentati linia urmatoare pentru a permite introducerea unui mesaj custom
-    # merkle_hellman_custom()
+   
