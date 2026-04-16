@@ -1,207 +1,252 @@
-"""
-Implementare Massey-Omura si Diffie-Hellman
-"""
+from math import gcd
 
-# ─────────────────────────────────────────────────────────────
-# Utilitare aritmetice
-# ─────────────────────────────────────────────────────────────
-
-def mod_exp(base: int, exp: int, mod: int) -> int:
-    """Ridicare la putere modulara eficienta (square-and-multiply)."""
-    return pow(base, exp, mod)
-
-def mod_inv(a: int, m: int) -> int:
-    """Inversul modular al lui a mod m (algoritmul extins al lui Euclid)."""
-    g, x, _ = extended_gcd(a, m)
-    if g != 1:
-        raise ValueError(f"{a} nu are invers modular fata de {m}")
-    return x % m
-
-def extended_gcd(a: int, b: int):
-    """Algoritmul extins al lui Euclid: returneaza (gcd, x, y) cu a*x + b*y = gcd."""
+def extended_gcd(a, b):
+    """Algoritmul extins al lui Euclid pentru calcul invers modular."""
     if a == 0:
         return b, 0, 1
     g, x, y = extended_gcd(b % a, a)
     return g, y - (b // a) * x, x
 
-# ─────────────────────────────────────────────────────────────
-# Criptosistemul Massey-Omura
-# ─────────────────────────────────────────────────────────────
+def modinv(a, m):
+    """Calculează inversa modulară a lui a modulo m."""
+    g, x, _ = extended_gcd(a % m, m)
+    if g != 1:
+        raise ValueError(f"{a} nu are invers modulo {m} (gcd={g})")
+    return x % m
 
-class MasseyOmura:
+# ====================================================================
+# MASSEY-OMURA: Protocol de transmitere sigura fara cheie preconvenita
+# ====================================================================
+
+def massey_omura_protocol():
     """
-    Protocol Massey-Omura pe Z_p*.
+    Protocol Massey-Omura: permite Bob sa trimita un mesaj Alice
+    fara sa se fie schimbat o cheie preconvenita.
     
-    Parametri publici: p (numar prim)
-    Alice: cheie privata eA, cu gcd(eA, p-1) = 1
-    Bob  : cheie privata eB, cu gcd(eB, p-1) = 1
+    Principiu: Fiecare participant are o exponentiare si inversa ei.
+    Mesajul trece prin 3 pasi de criptare/decriptare reciproca.
     """
-
-    def __init__(self, p: int):
-        self.p = p
-        self.phi = p - 1          # phi(p) = p-1 pentru p prim
-
-    def generate_keys(self, e: int):
-        """
-        Genereaza perechea (e, d) unde d = e^{-1} mod (p-1).
-        e trebuie sa fie coprim cu p-1.
-        """
-        from math import gcd
-        if gcd(e, self.phi) != 1:
-            raise ValueError(f"e={e} nu este coprim cu phi={self.phi}")
-        d = mod_inv(e, self.phi)
-        return e, d
-
-    def encrypt(self, M: int, e: int) -> int:
-        """Criptare: C = M^e mod p."""
-        return mod_exp(M, e, self.p)
-
-    def decrypt(self, C: int, d: int) -> int:
-        """Decriptare: M = C^d mod p."""
-        return mod_exp(C, d, self.p)
-
-    def protocol(self, M: int, eA: int, eB: int):
-        """
-        Simuleaza protocolul complet in 3 pasi:
-          Pas 1: Alice -> Bob: C1 = M^{eA} mod p
-          Pas 2: Bob -> Alice: C2 = C1^{eB} mod p = M^{eA*eB}
-          Pas 3: Alice -> Bob: C3 = C2^{dA} mod p = M^{eB}
-          Final: Bob   calculeaza M = C3^{dB} mod p
-        """
-        p = self.p
-        _, dA = self.generate_keys(eA)
-        _, dB = self.generate_keys(eB)
-
-        print("=" * 55)
-        print("  PROTOCOL MASSEY-OMURA")
-        print(f"  Parametru public: p = {p}")
-        print(f"  Mesaj original:   M = {M}")
-        print("=" * 55)
-        print(f"\n[Chei]")
-        print(f"  Alice: eA={eA}, dA={dA}  (eA*dA == {(eA*dA) % (p-1)} mod {p-1})")
-        print(f"  Bob  : eB={eB}, dB={dB}  (eB*dB == {(eB*dB) % (p-1)} mod {p-1})")
-
-        # Pas 1: Alice -> Bob
-        C1 = self.encrypt(M, eA)
-        print(f"\n[Pas 1] Alice -> Bob")
-        print(f"  C1 = M^eA mod p = {M}^{eA} mod {p} = {C1}")
-
-        # Pas 2: Bob -> Alice
-        C2 = self.encrypt(C1, eB)
-        print(f"\n[Pas 2] Bob -> Alice")
-        print(f"  C2 = C1^eB mod p = {C1}^{eB} mod {p} = {C2}")
-
-        # Pas 3: Alice -> Bob
-        C3 = self.decrypt(C2, dA)
-        print(f"\n[Pas 3] Alice -> Bob")
-        print(f"  C3 = C2^dA mod p = {C2}^{dA} mod {p} = {C3}")
-
-        # Final: Bob decripteaza
-        M_rec = self.decrypt(C3, dB)
-        print(f"\n[Final] Bob decripteaza")
-        print(f"  M  = C3^dB mod p = {C3}^{dB} mod {p} = {M_rec}")
-
-        ok = "[OK] CORECT" if M_rec == M else "[FAIL] EROARE"
-        print(f"\n  Mesaj recuperat: {M_rec}  {ok}")
-        print("=" * 55)
-        return C1, C2, C3, M_rec
-
-# ─────────────────────────────────────────────────────────────
-# Schimbul de chei Diffie-Hellman
-# ─────────────────────────────────────────────────────────────
-
-class DiffieHellman:
-    """
-    Schimb de chei Diffie-Hellman pe Z_p*.
-    Parametri publici: p (prim), g (generator).
-    """
-
-    def __init__(self, p: int, g: int):
-        self.p = p
-        self.g = g
-
-    def public_key(self, secret: int) -> int:
-        """Cheie publica: g^secret mod p."""
-        return mod_exp(self.g, secret, self.p)
-
-    def shared_key(self, their_public: int, my_secret: int) -> int:
-        """Cheie comuna: their_public^my_secret mod p."""
-        return mod_exp(their_public, my_secret, self.p)
-
-    def protocol(self, a: int, b: int):
-        """Ruleaza protocolul DH si afiseaza toti pasii."""
-        p, g = self.p, self.g
-        print("=" * 55)
-        print("  SCHIMB DE CHEI DIFFIE-HELLMAN")
-        print(f"  Parametri publici: p={p}, g={g}")
-        print("=" * 55)
-
-        # Chei private
-        print(f"\n[Chei private]")
-        print(f"  Alice: a = {a}")
-        print(f"  Bob  : b = {b}")
-
-        # Chei publice
-        A = self.public_key(a)
-        B = self.public_key(b)
-        print(f"\n[Chei publice trimise]")
-        print(f"  Alice trimite: A = g^a mod p = {g}^{a} mod {p} = {A}")
-        print(f"  Bob   trimite: B = g^b mod p = {g}^{b} mod {p} = {B}")
-
-        # Chei comune
-        kA = self.shared_key(B, a)
-        kB = self.shared_key(A, b)
-        print(f"\n[Cheie comuna calculata]")
-        print(f"  Alice: k = B^a mod p = {B}^{a} mod {p} = {kA}")
-        print(f"  Bob  : k = A^b mod p = {A}^{b} mod {p} = {kB}")
-
-        ok = "[OK] CORECT - chei identice!" if kA == kB else "[FAIL] EROARE"
-        print(f"\n  Cheie secreta k = {kA}   {ok}")
-        print("=" * 55)
-        return A, B, kA
-
-
-# ─────────────────────────────────────────────────────────────
-# Main - Teste
-# ─────────────────────────────────────────────────────────────
-
-if __name__ == "__main__":
-    print("\n")
-    print("#" * 60)
-    print("#" + " " * 58 + "#")
-    print("#" + "  DEMONSTRATIE: MASSEY-OMURA SI DIFFIE-HELLMAN".center(58) + "#")
-    print("#" + " " * 58 + "#")
-    print("#" * 60)
     
-    # ────────────────────────────────────────
-    # Test 1: Massey-Omura
-    # ────────────────────────────────────────
-    print("\n\n>>> TEST 1: CRIPTOSISTEMUL MASSEY-OMURA <<<\n")
-    
-    # Parametru prim
-    p = 62657
-    M = 31337  # Mesajul de criptat
-    eA = 17
-    eB = 19
-    
-    mo = MasseyOmura(p)
-    C1, C2, C3, M_rec = mo.protocol(M, eA, eB)
-    
-    # ────────────────────────────────────────
-    # Test 2: Diffie-Hellman
-    # ────────────────────────────────────────
-    print("\n\n>>> TEST 2: SCHIMBUL DE CHEI DIFFIE-HELLMAN <<<\n")
+    print("\n" + "=" * 70)
+    print("PROTOCOLUL MASSEY-OMURA")
+    print("=" * 70)
     
     # Parametri publici
-    p_dh = 62657
-    g = 2
+    p = 61  # Numar prim
+    phi_p = p - 1  # = 60 = 2^2 * 3 * 5
     
-    # Chei private
-    a = 41
-    b = 53
+    print(f"\n[PARAMETRI PUBLICI]")
+    print(f"  p = {p} (prim)")
+    print(f"  phi(p) = {phi_p}")
     
-    dh = DiffieHellman(p_dh, g)
-    A, B, k = dh.protocol(a, b)
+    # Alegerea exponenților
+    # Exponenții trebuie să fie coprimi cu phi(p)
+    e_A = 7    # gcd(7, 60) = 1 ✓
+    e_B = 11   # gcd(11, 60) = 1 ✓
     
-    print("\n\n[OK] Programul s-a executat cu succes!\n")
+    # Calculul inverselor
+    d_A = modinv(e_A, phi_p)
+    d_B = modinv(e_B, phi_p)
+    
+    print(f"\n[CHEI PRIVATE]")
+    print(f"  Alice: e_A={e_A}, d_A={d_A}")
+    print(f"    Verificare: {e_A}*{d_A} mod {phi_p} = {(e_A*d_A) % phi_p}")
+    print(f"  Bob:   e_B={e_B}, d_B={d_B}")
+    print(f"    Verificare: {e_B}*{d_B} mod {phi_p} = {(e_B*d_B) % phi_p}")
+    
+    # Mesajul
+    M = 13
+    print(f"\n[MESAJ ORIGINAL]")
+    print(f"  M = {M}")
+    
+    # === PROTOCOL 3 PASI ===
+    print(f"\n[PROTOCOL 3 PASI]")
+    
+    # Pasul 1: Alice cripteaza si trimite lui Bob
+    C1 = pow(M, e_A, p)
+    print(f"\n  [Pasul 1] Alice -> Bob")
+    print(f"    C1 = M^e_A mod p = {M}^{e_A} mod {p} = {C1}")
+    
+    # Pasul 2: Bob cripteaza si trimite inapoi lui Alice
+    C2 = pow(C1, e_B, p)
+    print(f"\n  [Pasul 2] Bob -> Alice")
+    print(f"    C2 = C1^e_B mod p = {C1}^{e_B} mod {p} = {C2}")
+    
+    # Pasul 3: Alice decripteaza si trimite inapoi lui Bob
+    C3 = pow(C2, d_A, p)
+    print(f"\n  [Pasul 3] Alice -> Bob")
+    print(f"    C3 = C2^d_A mod p = {C2}^{d_A} mod {p} = {C3}")
+    
+    # Pasul 4: Bob decripteaza mesajul final
+    M_recovered = pow(C3, d_B, p)
+    print(f"\n  [Pasul 4] Bob decripteaza")
+    print(f"    M = C3^d_B mod p = {C3}^{d_B} mod {p} = {M_recovered}")
+    
+    # Verificare
+    print(f"\n[VERIFICARE]")
+    print(f"  Mesaj original:  {M}")
+    print(f"  Mesaj recuperat: {M_recovered}")
+    status = "[OK] CORECT" if M == M_recovered else "[FAIL] EROARE"
+    print(f"  {status}")
+    
+    print("=" * 70)
 
+
+# ====================================================================
+# DIFFIE-HELLMAN: Schimb de chei
+# ====================================================================
+
+def diffie_hellman_protocol():
+    """
+    Protocolul Diffie-Hellman permite doi participanti sa stabileasca
+    o cheie secreta comuna fara sa se intalneasca si fara sa transmita
+    direct aceasta cheie printr-un canal nesigur.
+    """
+    
+    print("\n" + "=" * 70)
+    print("PROTOCOLUL DIFFIE-HELLMAN")
+    print("=" * 70)
+    
+    # Parametri publici
+    p = 61  # Numar prim (generator al campului multiplicativ Z_p*)
+    g = 2   # Generator (primitiva modulo p)
+    
+    print(f"\n[PARAMETRI PUBLICI]")
+    print(f"  p = {p} (prim)")
+    print(f"  g = {g} (generator)")
+    
+    # Chei private (secrete)
+    a = 7   # Cheia secreta a lui Alice
+    b = 11  # Cheia secreta a lui Bob
+    
+    print(f"\n[CHEI PRIVATE]")
+    print(f"  Alice: a = {a}")
+    print(f"  Bob:   b = {b}")
+    
+    # === SCHIMB DE CHEI ===
+    print(f"\n[SCHIMB PUBLIC DE CHEI]")
+    
+    # Alice calculeaza si trimite cheia publica
+    A = pow(g, a, p)
+    print(f"\n  Alice calculeaza: A = g^a mod p = {g}^{a} mod {p} = {A}")
+    print(f"  Alice trimite lui Bob: A = {A}")
+    
+    # Bob calculeaza si trimite cheia publica
+    B = pow(g, b, p)
+    print(f"\n  Bob calculeaza: B = g^b mod p = {g}^{b} mod {p} = {B}")
+    print(f"  Bob trimite lui Alice: B = {B}")
+    
+    # === CALCUL CHEIE COMUNA ===
+    print(f"\n[CALCUL CHEIE COMUNA]")
+    
+    # Alice calculeaza cheia comuna
+    kA = pow(B, a, p)
+    print(f"\n  Alice calculeaza: k = B^a mod p = {B}^{a} mod {p} = {kA}")
+    
+    # Bob calculeaza cheia comuna
+    kB = pow(A, b, p)
+    print(f"  Bob calculeaza:   k = A^b mod p = {A}^{b} mod {p} = {kB}")
+    
+    # Verificare
+    print(f"\n[VERIFICARE]")
+    print(f"  Cheia Alice: {kA}")
+    print(f"  Cheia Bob:   {kB}")
+    status = "[OK] CORECT - Chei identice!" if kA == kB else "[FAIL] EROARE"
+    print(f"  {status}")
+    
+    print("=" * 70)
+
+
+def explicatii():
+    """Afiseaza explicatii despre protocoalele implementate."""
+    
+    print("\n" + "=" * 70)
+    print("EXPLICATII: MASSEY-OMURA SI DIFFIE-HELLMAN")
+    print("=" * 70)
+    
+    print(f"""
+1. PROTOCOLUL MASSEY-OMURA
+===========================
+
+Scop: Transmiterea sigura a unui mesaj fara intelegere prealabila a cheii.
+
+Principiu (metafora "lacatul"):
+  - Alice si Bob fiecare au "lacatul si cheia" proprie
+  - Mesajul e un colet care trece prin 3 pasi
+  
+Pasi:
+  1. Alice cripteaza: M -> C1 = M^e_A mod p
+  2. Bob adauga criptare: C1 -> C2 = C1^e_B mod p (mesaj dublu criptat)
+  3. Alice decripteaza-si lacatul: C2 -> C3 = C2^d_A mod p
+  4. Bob decripteaza final: C3 -> M = C3^d_B mod p
+
+Securitate:
+  - Fara e_A, d_A nu poti elimina criptarea lui Alice
+  - Fara e_B, d_B nu poti elimina criptarea lui Bob
+  - Intermediari vad doar C1, C2, C3 (valori puterii)
+
+Limitari:
+  - Presupune grup ciclic (Z_p* cu p prim)
+  - Ataci: Pohlig-Hellman daca p-1 are factori mici
+
+
+2. PROTOCOLUL DIFFIE-HELLMAN
+=============================
+
+Scop: Stabilire de cheie secreta comuna printr-un canal nesigur.
+
+Principiu (integrare puteri):
+  - Alice: alege a secret, calculeaza A = g^a mod p (public)
+  - Bob: alege b secret, calculeaza B = g^b mod p (public)
+  - Cheia comuna: k = g^(ab) mod p
+  
+Pasi:
+  1. Alice trimite A, Bob trimite B (public)
+  2. Alice calculeaza: k = B^a mod p = (g^b)^a = g^(ab)
+  3. Bob calculeaza: k = A^b mod p = (g^a)^b = g^(ab)
+  4. Ambii au aceeasi cheie k!
+
+De ce functioneaza:
+  - Ei pot calcula g^(ab) fiecare cu datele lor
+  - Oricine cunoaste doar A, B, g, p nu poate calcula ab usor
+  
+Securitate:
+  - Bazat pe greu al Discrete Logarithm Problem
+  - Problema: logaritm discret e NP-hard
+  - Ataci: Pohlig-Hellman, Number Field Sieve
+
+Vulnerabilitate (MITM - Man in the Middle):
+  - Atacator poate intercpta A, B si invaloca proprii parametri
+  - Solutie: Autentificare cu certificate digitale (TLS/SSL)
+
+
+3. DIFERENTE
+=============
+
+Massey-Omura:
+  - Transmitere sigura A -> B (3 pasi)
+  - Ambii trebuie sa fie online
+  - Mesaj cunoscut dinainte
+  
+Diffie-Hellman:
+  - Stabilire cheie comuna (simetrica)
+  - Pentru comunicatie ulterioara
+  - Fara mesaj, doar paramentri
+
+Aplicatii moderne:
+  - HTTPS/TLS: Diffie-Hellman pentru key exchange
+  - GPG/PGP: RSA/ECC pentru directa, apoi simetrica
+  - Massey-Omura: Putini folositi (considerat deprecated)
+""")
+    print("=" * 70)
+
+
+if __name__ == "__main__":
+    # Demonstratii
+    massey_omura_protocol()
+    diffie_hellman_protocol()
+    
+    # Explicatii
+    explicatii()
+    
+    print("\n[OK] Programul s-a executat cu succes!\n")
