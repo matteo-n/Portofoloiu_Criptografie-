@@ -155,8 +155,6 @@ def diffie_hellman_protocol():
     print(f"  {status}")
     
     print("=" * 70)
-
-
 def explicatii():
     """Afiseaza explicatii despre protocoalele implementate."""
     
@@ -164,83 +162,6 @@ def explicatii():
     print("EXPLICATII: MASSEY-OMURA SI DIFFIE-HELLMAN")
     print("=" * 70)
     
-    print(f"""
-1. PROTOCOLUL MASSEY-OMURA
-===========================
-
-Scop: Transmiterea sigura a unui mesaj fara intelegere prealabila a cheii.
-
-Principiu (metafora "lacatul"):
-  - Alice si Bob fiecare au "lacatul si cheia" proprie
-  - Mesajul e un colet care trece prin 3 pasi
-  
-Pasi:
-  1. Alice cripteaza: M -> C1 = M^e_A mod p
-  2. Bob adauga criptare: C1 -> C2 = C1^e_B mod p (mesaj dublu criptat)
-  3. Alice decripteaza-si lacatul: C2 -> C3 = C2^d_A mod p
-  4. Bob decripteaza final: C3 -> M = C3^d_B mod p
-
-Securitate:
-  - Fara e_A, d_A nu poti elimina criptarea lui Alice
-  - Fara e_B, d_B nu poti elimina criptarea lui Bob
-  - Intermediari vad doar C1, C2, C3 (valori puterii)
-
-Limitari:
-  - Presupune grup ciclic (Z_p* cu p prim)
-  - Ataci: Pohlig-Hellman daca p-1 are factori mici
-
-
-2. PROTOCOLUL DIFFIE-HELLMAN
-=============================
-
-Scop: Stabilire de cheie secreta comuna printr-un canal nesigur.
-
-Principiu (integrare puteri):
-  - Alice: alege a secret, calculeaza A = g^a mod p (public)
-  - Bob: alege b secret, calculeaza B = g^b mod p (public)
-  - Cheia comuna: k = g^(ab) mod p
-  
-Pasi:
-  1. Alice trimite A, Bob trimite B (public)
-  2. Alice calculeaza: k = B^a mod p = (g^b)^a = g^(ab)
-  3. Bob calculeaza: k = A^b mod p = (g^a)^b = g^(ab)
-  4. Ambii au aceeasi cheie k!
-
-De ce functioneaza:
-  - Ei pot calcula g^(ab) fiecare cu datele lor
-  - Oricine cunoaste doar A, B, g, p nu poate calcula ab usor
-  
-Securitate:
-  - Bazat pe greu al Discrete Logarithm Problem
-  - Problema: logaritm discret e NP-hard
-  - Ataci: Pohlig-Hellman, Number Field Sieve
-
-Vulnerabilitate (MITM - Man in the Middle):
-  - Atacator poate intercpta A, B si invaloca proprii parametri
-  - Solutie: Autentificare cu certificate digitale (TLS/SSL)
-
-
-3. DIFERENTE
-=============
-
-Massey-Omura:
-  - Transmitere sigura A -> B (3 pasi)
-  - Ambii trebuie sa fie online
-  - Mesaj cunoscut dinainte
-  
-Diffie-Hellman:
-  - Stabilire cheie comuna (simetrica)
-  - Pentru comunicatie ulterioara
-  - Fara mesaj, doar paramentri
-
-Aplicatii moderne:
-  - HTTPS/TLS: Diffie-Hellman pentru key exchange
-  - GPG/PGP: RSA/ECC pentru directa, apoi simetrica
-  - Massey-Omura: Putini folositi (considerat deprecated)
-""")
-    print("=" * 70)
-
-
 if __name__ == "__main__":
     # Demonstratii
     massey_omura_protocol()
