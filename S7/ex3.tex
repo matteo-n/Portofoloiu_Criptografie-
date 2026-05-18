@@ -1,0 +1,132 @@
+\documentclass[12pt]{article}
+
+% Pachete necesare pentru codificarea caracterelor și diacritice
+\usepackage[utf8]{inputenc}
+\usepackage[romanian]{babel}
+
+% Pachete matematice avansate
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{amsthm}
+
+% Setarea marginilor paginii
+\usepackage[margin=1in]{geometry}
+
+\title{Seminar 7: Criptosistemul RSA -- Rezolvare Problemă}
+\author{}
+\date{} % Elimină data și spațiul nefolosit sub titlu
+
+\begin{document}
+
+\maketitle
+
+\section*{Problemă: Criptosistemul RSA (Percy și Charlie)}
+
+\textit{Percy și Charlie comunică folosind criptosistemul RSA. Percy are cheia publică: $n = 187$ și $e = 107$.}
+\begin{enumerate}
+    \item[a.] \textit{Aflați cheia privată a lui Percy.}
+    \item[b.] \textit{Charlie îi transmite lui Percy mesajul \texttt{ABACFPFP}. Știind că lungimea blocurilor mesajelor în clar este 1 și a mesajelor criptate este 2, decriptați textul.}
+\end{enumerate}
+
+
+
+\subsection*{a. Determinarea Cheii Private a lui Percy}
+
+Cheia privată a lui Percy este perechea $(n, d)$, unde $d$ este exponentul de decriptare. Pentru a-l calcula pe $d$, trebuie mai întâi să factorizăm modulul public $n = 187$.
+
+\subsubsection*{Pasul 1: Factorizarea lui $n$}
+Căutăm numerele prime $p$ și $q$ astfel încât $n = p \cdot q$. Observăm prin verificări directe că:
+\[
+187 = 11 \times 17 \implies p = 11, \quad q = 17
+\]
+
+\subsubsection*{Pasul 2: Calculul funcției indicatoare a lui Euler $\varphi(n)$}
+\[
+\varphi(n) = (p - 1)(q - 1) = (11 - 1)(17 - 1) = 10 \times 16 = 160
+\]
+
+\subsubsection*{Pasul 3: Calculul exponentului de decriptare $d$}
+Exponentul $d$ este inversul modular al lui $e = 107$ modulo $\varphi(n) = 160$, adică:
+\[
+107 \cdot d \equiv 1 \pmod{160}
+\]
+Aplicăm algoritmul lui Euclid extins pentru perechea $(160, 107)$:
+\begin{align*}
+160 &= 107 \times 1 + 53 \\
+107 &= 53 \times 2 + 1
+\end{align*}
+
+Reconstituim restul $1$ prin substituție inversă:
+\begin{align*}
+1 &= 107 - 53 \times 2 \\
+1 &= 107 - (160 - 107 \times 1) \times 2 \\
+1 &= 3 \times 107 - 2 \times 160
+\end{align*}
+Trecând relația modulo $160$, obținem $3 \times 107 \equiv 1 \pmod{160}$. Prin urmare, $d = 3$.
+
+\textbf{Concluzie pct. a:} Cheia privată a lui Percy este $\mathbf{(n = 187, d = 3)}$.
+
+---
+
+\subsection*{b. Decriptarea Mesajului}
+
+Mesajul cifrat primit este \texttt{ABACFPFP}. Știm că blocurile criptate au lungimea $2$ (digrafi), iar blocurile în clar au lungimea $1$ (monoradix).
+
+\subsubsection*{Pasul 1: Segmentarea și conversia numerică în baza 26}
+Împărțim textul cifrat în blocuri de câte 2 caractere și le transformăm în valori numerice în baza $26$, utilizând formula $c = \text{cod}(C_1) \cdot 26 + \text{cod}(C_2)$:
+\begin{enumerate}
+    \item \texttt{AB} $\rightarrow (0, 1)_{26} = 0 \cdot 26 + 1 = 1$
+    \item \texttt{AC} $\rightarrow (0, 2)_{26} = 0 \cdot 26 + 2 = 2$
+    \item \texttt{FP} $\rightarrow (5, 15)_{26} = 5 \cdot 26 + 15 = 130 + 15 = 145$
+    \item \texttt{FP} $\rightarrow (5, 15)_{26} = 145$
+\end{enumerate}
+
+\subsubsection*{Pasul 2: Aplicarea formulei de decriptare RSA}
+Pentru fiecare valoare criptată $c$, blocul în clar sub formă numerică $m$ se obține prin calculul:
+\[
+m \equiv c^d \pmod{n} \implies m \equiv c^3 \pmod{187}
+\]
+
+\begin{itemize}
+    \item \textbf{Pentru primul bloc ($c_1 = 1$):}
+    \[ m_1 \equiv 1^3 = 1 \pmod{187} \rightarrow \mathbf{1} \]
+    
+    \item \textbf{Pentru al doilea bloc ($c_2 = 2$):}
+    \[ m_2 \equiv 2^3 = 8 \pmod{187} \rightarrow \mathbf{8} \]
+    
+    \item \textbf{Pentru al treilea bloc ($c_3 = 145$):}
+    Calculăm $145^3 \pmod{187}$. Reducem mai întâi baza observând că:
+    \[ 145 \equiv 145 - 187 = -42 \pmod{187} \]
+    Atunci:
+    \[ 145^2 \equiv (-42)^2 = 1764 \pmod{187} \]
+    Efectuăm împărțirea: $1764 = 187 \times 9 + 81 \implies 145^2 \equiv 81 \pmod{187}$.
+    
+    Acum înmulțim cu încă un factor:
+    \[ 145^3 \equiv 145^2 \cdot 145 \equiv 81 \cdot (-42) = -3402 \pmod{187} \]
+    Efectuăm împărțirea valorii absolute: $3402 = 187 \times 18 + 36 \implies -3402 \equiv -36 \pmod{187}$.
+    
+    Aducem la rest pozitiv:
+    \[ m_3 = -36 + 187 = \mathbf{151} \]
+    
+    \item \textbf{Pentru al patrulea bloc ($c_4 = 145$):}
+    Fiind identic cu blocul anterior, obținem direct aceiași valoare:
+    \[ m_4 = \mathbf{151} \]
+\end{itemize}
+
+\subsubsection*{Pasul 3: Transpunerea valorilor $m$ în caractere (baza 26, lungime 1)}
+Deoarece lungimea blocurilor în clar este 1, fiecare valoare obținută reprezintă codul unei singure litere modulo 26 ($m \pmod{26}$):
+\begin{enumerate}
+    \item $m_1 = 1 \implies 1 \pmod{26} \rightarrow \mathbf{B}$
+    \item $m_2 = 8 \implies 8 \pmod{26} \rightarrow \mathbf{I}$
+    \item $m_3 = 151 \implies 151 = 26 \times 5 + 21 \implies 21 \pmod{26} \rightarrow \mathbf{V}$
+    \item $m_4 = 151 \implies 21 \pmod{26} \rightarrow \mathbf{V}$
+\end{enumerate}
+
+\subsection*{Concluzie Finală}
+Prin concatenarea caracterelor rezultate din decriptarea celor 4 blocuri succesive, textul în clar obținut este:
+\[
+\text{Mesajul decriptat: } \mathbf{\texttt{BIVV}}
+\]
+
+\end{document}
