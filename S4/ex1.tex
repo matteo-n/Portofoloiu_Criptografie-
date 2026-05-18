@@ -1,0 +1,152 @@
+\documentclass[12pt]{article}
+
+% Pachete necesare pentru codificarea caracterelor și diacritice
+\usepackage[utf8]{inputenc}
+\usepackage[romanian]{babel}
+
+% Pachete matematice avansate
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{amsthm}
+
+% Setarea marginilor paginii
+\usepackage[margin=1in]{geometry}
+
+\title{Seminar 4: Criptosisteme Simetrice -- Rezolvare Teme}
+\author{}
+\date{} % Elimină complet data și spațiul ei sub titlu
+
+\begin{document}
+
+\maketitle
+
+
+\subsection*{exercitiul 43}
+\textit{Se folosește criptarea Hill pe blocuri de 2 caractere cu matricea de criptare:
+\[
+A = \begin{pmatrix} 9 & 4 \\ 5 & 7 \end{pmatrix} \in \mathcal{M}_{2\times2}(\mathbb{Z}_{26})
+\]
+Alfabetul este $A-Z$. Determinați matricea de decriptare. Decriptați mesajul \texttt{ZICVTWQN}.}
+
+
+\subsection*{Determinarea Matricei de Decriptare ($A^{-1}$)}
+Matricea de decriptare este inversul modular al matricei $A$ în raport cu modulul $26$, calculată după formula:
+\[
+A^{-1} = (\det A)^{-1} \cdot A^* \pmod{{26}}
+\]
+
+\subsubsection*{Pasul A: Calculul determinantului și al inversului său modular}
+Calculăm determinantul în $\mathbb{Z}$:
+\[
+\det A = 9 \cdot 7 - 4 \cdot 5 = 63 - 20 = 43
+\]
+Reducem modulo $26$:
+\[
+\det A \equiv 43 - 26 = 17 \pmod{{26}}
+\]
+
+Căutăm inversul modular al lui $17$ modulo $26$, adică un număr $x$ pentru care $17x \equiv 1 \pmod{{26}}$. 
+Aplicăm Algoritmul lui Euclid standard:
+\begin{align*}
+26 &= 17 \times 1 + 9 \\
+17 &= 9 \times 1 + 8 \\
+9 &= 8 \times 1 + 1
+\end{align*}
+
+Prin substituție inversă, exprimăm restul $1$:
+\begin{align*}
+1 &= 9 - 8 \times 1 \\
+1 &= 9 - (17 - 9 \times 1) = 2 \times 9 - 17 \\
+1 &= 2 \times (26 - 17 \times 1) - 17 = 2 \times 26 - 3 \times 17
+\end{align*}
+Trecând în $\mathbb{Z}_{26}$, obținem $-3 \times 17 \equiv 1 \pmod{{26}}$. 
+Deoarece $-3 \equiv -3 + 26 = 23 \pmod{{26}}$, rezultă că:
+\[
+(\det A)^{-1} \equiv 17^{-1} \equiv 23 \pmod{{26}}
+\]
+
+\subsubsection*{Pasul B: Construirea matricei adjuncte ($A^*$)}
+Pentru o matrice de dimensiune $2 \times 2$, adjuncta se obține inversând elementele de pe diagonala principală și schimbând semnul celor de pe diagonala secundară:
+\[
+A^* = \begin{pmatrix} 7 & -4 \\ -5 & 9 \end{pmatrix} \equiv \begin{pmatrix} 7 & 22 \\ 21 & 9 \end{pmatrix} \pmod{{26}}
+\]
+
+\subsubsection*{Pasul C: Calculul final al matricei $A^{-1}$}
+\[
+A^{-1} = 23 \cdot \begin{pmatrix} 7 & 22 \\ 21 & 9 \end{pmatrix} = \begin{pmatrix} 23 \cdot 7 & 23 \cdot 22 \\ 23 \cdot 21 & 23 \cdot 9 \end{pmatrix} = \begin{pmatrix} 161 & 506 \\ 483 & 207 \end{pmatrix}
+\]
+Reducem elementele modulo $26$:
+\begin{itemize}
+    \item $161 = 26 \times 6 + 5 \implies 5$
+    \item $506 = 26 \times 19 + 12 \implies 12$
+    \item $483 = 26 \times 18 + 15 \implies 15$
+    \item $207 = 26 \times 7 + 25 \implies 25$
+\end{itemize}
+Așadar, \textbf{matricea de decriptare} este:
+\[
+A^{-1} = \begin{pmatrix} 5 & 12 \\ 15 & 25 \end{pmatrix}
+\]
+
+\subsection*{Decriptarea Mesajului \texttt{ZICVTWQN}}
+Împărțim textul cifrat în blocuri (digrafi) de câte 2 caractere și le convertim în vectori numerici coloană:
+\[
+\texttt{ZI} \rightarrow \begin{pmatrix} 25 \\ 8 \end{pmatrix}, \quad 
+\texttt{CV} \rightarrow \begin{pmatrix} 2 \\ 21 \end{pmatrix}, \quad 
+\texttt{TW} \rightarrow \begin{pmatrix} 19 \\ 22 \end{pmatrix}, \quad 
+\texttt{QN} \rightarrow \begin{pmatrix} 16 \\ 13 \end{pmatrix}
+\]
+
+Aplicăm transformarea liniară de decriptare pentru fiecare bloc: $M_i = A^{-1} \cdot C_i \pmod{{26}}$.
+
+\subsubsection*{Digraful 1: \texttt{ZI}}
+\[
+A^{-1} \cdot \begin{pmatrix} 25 \\ 8 \end{pmatrix} = \begin{pmatrix} 5 \cdot 25 + 12 \cdot 8 \\ 15 \cdot 25 + 25 \cdot 8 \end{pmatrix} = \begin{pmatrix} 125 + 96 \\ 375 + 200 \end{pmatrix} = \begin{pmatrix} 221 \\ 575 \end{pmatrix}
+\]
+Redus modulo $26$:
+\begin{itemize}
+    \item $221 = 26 \times 8 + 13 \rightarrow \mathbf{13 \ (N)}$
+    \item $575 = 26 \times 22 + 3 \rightarrow \mathbf{3 \ (D)}$
+\end{itemize}
+Obținem digraful în clar: \texttt{ND}.
+
+\subsubsection*{Digraful 2: \texttt{CV}}
+\[
+A^{-1} \cdot \begin{pmatrix} 2 \\ 21 \end{pmatrix} = \begin{pmatrix} 5 \cdot 2 + 12 \cdot 21 \\ 15 \cdot 2 + 25 \cdot 21 \end{pmatrix} = \begin{pmatrix} 10 + 252 \\ 30 + 525 \end{pmatrix} = \begin{pmatrix} 262 \\ 555 \end{pmatrix}
+\]
+Redus modulo $26$:
+\begin{itemize}
+    \item $262 = 26 \times 10 + 2 \rightarrow \mathbf{2 \ (C)}$
+    \item $555 = 26 \times 21 + 9 \rightarrow \mathbf{9 \ (J)}$
+\end{itemize}
+Obținem digraful în clar: \texttt{CJ}.
+
+\subsubsection*{Digraful 3: \texttt{TW}}
+\[
+A^{-1} \cdot \begin{pmatrix} 19 \\ 22 \end{pmatrix} = \begin{pmatrix} 5 \cdot 19 + 12 \cdot 22 \\ 15 \cdot 19 + 25 \cdot 22 \end{pmatrix} = \begin{pmatrix} 95 + 264 \\ 285 + 550 \end{pmatrix} = \begin{pmatrix} 359 \\ 835 \end{pmatrix}
+\]
+Redus modulo $26$:
+\begin{itemize}
+    \item $359 = 26 \times 13 + 21 \rightarrow \mathbf{21 \ (V)}$
+    \item $835 = 26 \times 32 + 3 \rightarrow \mathbf{3 \ (D)}$
+\end{itemize}
+Obținem digraful în clar: \texttt{VD}.
+
+\subsubsection*{Digraful 4: \texttt{QN}}
+\[
+A^{-1} \cdot \begin{pmatrix} 16 \\ 13 \end{pmatrix} = \begin{pmatrix} 5 \cdot 16 + 12 \cdot 13 \\ 15 \cdot 16 + 25 \cdot 13 \end{pmatrix} = \begin{pmatrix} 80 + 156 \\ 240 + 325 \end{pmatrix} = \begin{pmatrix} 236 \\ 565 \end{pmatrix}
+\]
+Redus modulo $26$:
+\begin{itemize}
+    \item $236 = 26 \times 9 + 2 \rightarrow \mathbf{2 \ (C)}$
+    \item $565 = 26 \times 21 + 19 \rightarrow \mathbf{19 \ (T)}$
+\end{itemize}
+Obținem digraful în clar: \texttt{CT}.
+
+\subsection*{Concluzie}
+Prin unirea blocurilor decriptate succesiv (\texttt{ND}, \texttt{CJ}, \texttt{VD}, \texttt{CT}), obținem textul în clar final:
+\[
+\text{Mesajul decriptat: } \mathbf{\texttt{NDCJVDCT}}
+\]
+
+\end{document}
