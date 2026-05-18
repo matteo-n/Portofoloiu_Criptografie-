@@ -1,0 +1,78 @@
+\documentclass[12pt]{article}
+
+% Pachete necesare pentru codificarea caracterelor și diacritice
+\usepackage[utf8]{inputenc}
+\usepackage[romanian]{babel}
+
+% Pachete matematice avansate
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{amsthm}
+
+% Setarea marginilor paginii
+\usepackage[margin=1in]{geometry}
+
+\title{Seminar 2: Criptografie -- Rezolvare Teme}
+\author{}
+\date{} % Elimină complet data și spațiul ei de sub titlu
+
+\begin{document}
+
+\maketitle
+
+
+\subsection*{Cerință}
+\textit{Determinați inversul modular al lui $23$ modulo $25$.}
+
+
+\subsection*{ Aplicarea Algoritmului lui Euclid Extins}
+
+\subsubsection*{Pasul A: Algoritmul lui Euclid Standard (Împărțirile parțiale)}
+Efectuăm împărțirile succesive cu rest pentru a confirma că numerele sunt prime între ele:
+\begin{align*}
+25 &= 23 \times 1 + 2 \\
+23 &= 2 \times 11 + 1 \\
+2 &= 1 \times 2 + 0
+\end{align*}
+Ultimul rest nenul este $1$, deci $\text{cmmdc}(25, 23) = 1$. Elementul este inversabil.
+
+\subsubsection*{Pasul B: Substituția inversă (Determinarea coeficienților)}
+Exprimăm resturile din relațiile de mai sus pentru a reconstitui identitatea lui Bézout:
+\begin{align*}
+1 &= 23 - 2 \times 11 \\
+2 &= 25 - 23 \times 1
+\end{align*}
+
+Înlocuim expresia lui $2$ în prima ecuație:
+\begin{align*}
+1 &= 23 - (25 - 23 \times 1) \times 11 \\
+1 &= 23 - 11 \times 25 + 11 \times 23 \\
+1 &= 12 \times 23 + (-11) \times 25
+\end{align*}
+
+Am obținut coeficienții Bézout: $u = 12$ și $v = -11$.
+
+\subsection*{Calculul Inversului Modular}
+Trecând relația de mai sus în inelul claselor de resturi $\mathbb{Z}_{25}$, termenul alcătuit din multiplul lui $25$ devine congruent cu $0$:
+\[
+12 \times 23 + (-11) \times 25 = 1 \implies 12 \times 23 \equiv 1 \pmod{25}
+\]
+
+Prin urmare, inversul modular al lui $23$ modulo $25$ este:
+\[
+23^{-1} \equiv 12 \pmod{25}
+\]
+
+\subsection*{Verificare Aritmetică}
+Pentru validarea rezultatului, înmulțim numărul inițial cu inversul determinat:
+\[
+23 \times 12 = 276
+\]
+Efectuăm împărțirea cu rest la modulul $25$:
+\[
+276 = 25 \times 11 + 1 \implies 276 \equiv 1 \pmod{25}
+\]
+Relația este verificată și complet demonstrată.
+
+\end{document}

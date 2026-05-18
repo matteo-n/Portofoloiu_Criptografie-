@@ -1,0 +1,67 @@
+\documentclass[12pt]{article}
+
+% Pachete necesare pentru codificarea caracterelor și diacritice
+\usepackage[utf8]{inputenc}
+\usepackage[romanian]{babel}
+
+% Pachete matematice avansate
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{amsthm}
+
+% Setarea marginilor paginii
+\usepackage[margin=1in]{geometry}
+
+\title{Seminar 2: Criptografie -- Rezolvare Teme}
+\author{}
+\date{} % Această linie goală elimină complet data și spațiul ei sub titlu
+
+\begin{document}
+
+\maketitle
+
+
+\subsection*{Exercitiul 2}
+\textit{Găsiți numărul maxim de pași pentru algoritmul lui Euclid. Explicați în ce context se obține.} 
+
+
+\subsection{Schiță de Demonstrație}
+Fie resturile succesive generate de algoritmul lui Euclid aplicat numerelor $a > b$:
+\begin{align*}
+a &= b \cdot q_1 + r_1, \quad 0 < r_1 < b \\
+b &= r_1 \cdot q_2 + r_2, \quad 0 < r_2 < r_1 \\
+  &\ \ \vdots \\
+r_{k-2} &= r_{k-1} \cdot q_k + r_k, \quad 0 < r_k < r_{k-1} \\
+r_{k-1} &= r_k \cdot q_{k+1} + 0
+\end{align*}
+Algoritmul s-a oprit după exact $k+1$ pași, iar ultimul rest nenul este $r_k \ge 1$. Deoarece resturile sunt strict descrescătoare și toate câturile $q_i \ge 1$, deducem inegalitățile:
+\begin{itemize}
+    \item $r_k \ge 1 = F_2$
+    \item $r_{k-1} \ge 2 \cdot r_k \ge 2 = F_3$ (deoarece $r_{k-1} > r_k \implies q_{k+1} \ge 2$)
+    \item $r_{k-2} = r_{k-1} \cdot q_k + r_k \ge r_{k-1} + r_k \ge F_3 + F_2 = F_4$
+\end{itemize}
+
+Prin inducție matematică, se demonstrează ușor că pentru orice pas $i$ avem:
+\[
+r_{k-i} \ge F_{i+2}
+\]
+Pentru primul pas al algoritmului (unde $i = k$), relația devine:
+\[
+b = r_0 \ge F_{k+2}
+\]
+Folosind proprietatea de creștere exponențială a șirului lui Fibonacci bazată pe Secțiunea de Aur ($\phi = \frac{1+\sqrt{5}}{2} \approx 1.618$), se știe că $F_{k+2} > \phi^k$. Prin urmare, avem:
+\[
+b > \phi^k
+\]
+Aplicând logaritmul în baza 10 în ambele părți ale inegalității obținem:
+\[
+\log_{10}(b) > k \cdot \log_{10}(\phi)
+\]
+Deoarece $\log_{10}(\phi) \approx \log_{10}(1.618) > 0.2$, rezultă că:
+\[
+\log_{10}(b) > \frac{k}{5} \implies k < 5 \cdot \log_{10}(b)
+\]
+Cum numărul total de pași este $k+1$, iar inegalitatea precedentă este strictă pentru mărgini întregi, se confirmă limita superioară impusă de Teorema lui Lamé.
+
+\end{document}

@@ -1,0 +1,104 @@
+\documentclass[12pt]{article}
+
+% Pachete necesare pentru codificarea caracterelor și diacritice
+\usepackage[utf8]{inputenc}
+\usepackage[romanian]{babel}
+
+% Pachete matematice avansate
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{amsthm}
+
+% Setarea marginilor paginii
+\usepackage[margin=1in]{geometry}
+
+\title{Seminar 2: Criptografie -- Rezolvare Teme}
+\author{}
+\date{} % Elimină complet data și spațiul ei sub titlu
+
+\begin{document}
+
+\maketitle
+
+
+\subsection*{Exercitiul 4}
+\textit{Demonstrați rezultatul (2) de mai sus (Structura soluției generale a ecuației $ax \equiv b \pmod n$).}
+
+\subsection*{Teoremă}
+Fie ecuația liniară de congruență:
+\begin{equation}
+ax \equiv b \pmod n
+\end{equation}
+Dacă $d = (a, n)$ divide pe $b$ ($d \mid b$), atunci ecuația (1) are exact $d$ soluții distincte în inelul $\mathbb{Z}_n$, iar soluția generală este de forma:
+\begin{equation}
+x \equiv A^{-1}B + k N \pmod n, \quad \text{unde } k \in \{0, 1, \dots, d-1\}
+\end{equation}
+unde $a = dA$, $b = dB$ și $n = dN$.
+
+\subsection*{Demonstrație}
+
+\subsubsection*{Pasul 1: Reducerea ecuației la o formă echivalentă}
+Prin definiția relației de congruență modulară, ecuația $ax \equiv b \pmod n$ este echivalentă cu existența unui număr întreg $y \in \mathbb{Z}$ astfel încât să aibă loc ecuația diofantică liniară:
+\[
+ax - ny = b
+\]
+Din ipoteză, știm că $d = (a, n)$ este cel mai mare divizor comun al numerelor $a$ și $n$. Deoarece $d \mid b$, putem simplifica ecuația prin împărțirea tuturor termenilor la $d$. Substituind $a = dA$, $b = dB$ și $n = dN$, obținem:
+\[
+\frac{dA}{d}x - \frac{dN}{d}y = \frac{dB}{d} \iff Ax - Ny = B
+\]
+Această nouă ecuație este perfect echivalentă în limbaj de congruențe cu:
+\begin{equation}
+AX \equiv B \pmod N
+\end{equation}
+
+\subsubsection*{Pasul 2: Existența și unicitatea soluției modulo $N$}
+Deoarece $d$ reprezintă cel mai mare divizor comun al numerelor $a$ și $n$, prin împărțirea componentelor la $d$ deducem că noii coeficienți sunt primi între ei:
+\[
+(A, N) = \left(\frac{a}{d}, \frac{n}{d}\right) = 1
+\]
+Proprietatea fundamentală a elementelor dintr-un inel de resturi ne garantează că, deoarece $(A, N) = 1$, clasa $\hat{A}$ este inversabilă în inelul $\mathbb{Z}_N$. Prin urmare, există un invers modular unic $A^{-1} \pmod N$.
+
+Înmulțind ecuația (3) la stânga cu $A^{-1}$, obținem soluția unică modulo $N$:
+\[
+x \equiv A^{-1}B \pmod N
+\]
+Notăm această soluție particulară cu $x_0 = A^{-1}B$. În mulțimea numerelor întregi $\mathbb{Z}$, forma tuturor soluțiilor care satisfac această relație este dată de:
+\[
+x = x_0 + k N, \quad \text{cu } k \in \mathbb{Z}
+\]
+
+\subsubsection*{Pasul 3: Determinarea numărului de soluții distincte în $\mathbb{Z}_n$}
+Noi căutăm soluțiile ecuației inițiale în inelul $\mathbb{Z}_n$, ceea ce înseamnă că suntem interesați să găsim câți reprezentanți unici și distincți generează forma $x = x_0 + k N$ în raport cu modulul $n$.
+
+Să presupunem că două valori întregi diferite ale parametrului, fie ele $k_1$ și $k_2$, produc soluții congruente modulo $n$:
+\[
+x_0 + k_1 N \equiv x_0 + k_2 N \pmod n
+\]
+Prin reducerea termenului asemenea $x_0$, relația devine:
+\[
+k_1 N \equiv k_2 N \pmod n
+\]
+Folosind faptul că $n = dN$, putem rescrie relația de divizibilitate implicită astfel:
+\[
+dN \mid (k_1 N - k_2 N) \iff dN \mid (k_1 - k_2)N
+\]
+Împărțind întreaga relație de divizibilitate prin factorul comun non-nul $N$, obținem:
+\[
+d \mid (k_1 - k_2) \iff k_1 \equiv k_2 \pmod d
+\]
+
+\subsection*{Concluzie}
+Relația $k_1 \equiv k_2 \pmod d$ demonstrează că două soluții sunt identice în inelul $\mathbb{Z}_n$ dacă și numai dacă indicii lor $k$ sunt congruenți modulo $d$. 
+
+Prin urmare, pentru a obține toate clasele de resturi distincte și neechivalente modulo $n$, este necesar și suficient să alegem pentru parametrul $k$ exact mulțimea completă de resturi la împărțirea cu $d$:
+\[
+k \in \{0, 1, 2, \dots, d-1\}
+\]
+Acest lucru demonstrează că ecuația inițială are exact $d$ soluții unice în $\mathbb{Z}_n$, exprimate prin formula generală:
+\[
+x \equiv A^{-1}B + k N \pmod n, \quad \text{unde } k \in \{0, 1, \dots, d-1\}
+\]
+Demonstrația este acum completă. \hfill $\blacksquare$
+
+\end{document}

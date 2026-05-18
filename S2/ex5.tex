@@ -1,0 +1,109 @@
+\documentclass[12pt]{article}
+
+% Pachete necesare pentru codificarea caracterelor și diacritice
+\usepackage[utf8]{inputenc}
+\usepackage[romanian]{babel}
+
+% Pachete matematice avansate
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{booktabs} % Pentru tabele elegante
+
+% Setarea marginilor paginii
+\usepackage[margin=1in]{geometry}
+
+\title{Seminar 2: Criptografie -- Rezolvare Teme}
+\author{}
+\date{} % Elimină complet data și spațiul ei de sub titlu
+
+\begin{document}
+
+\maketitle
+
+
+\subsection*{Cerință}
+\textit{Determinați cel mai mare divizor comun al lui $32335$ și $53331$ folosind algoritmul lui Euclid extins și găsiți coeficienții Bezout.}
+
+
+\subsection*{Algoritmul lui Euclid Extins (Determinarea coeficienților)}
+Pentru a găsi coeficienții întregi $u$ și $v$ care satisfac identitatea lui Bézout:
+\[
+29 = u \cdot 53331 + v \cdot 32335
+\]
+urmărim evoluția vectorilor de coeficienți $x_i = (u_i, v_i)$ asociați fiecărui rest curent, folosind relația de recurență:
+\[
+x_{i} = x_{i-2} - q_{i-2} \cdot x_{i-1}
+\]
+unde $q_{i-2}$ este câtul obținut la pasul respectiv.
+
+\subsubsection*{Inițializare:}
+\begin{itemize}
+    \item Pentru $a = 53331$: \quad $x_a = (1, 0)$
+    \item Pentru $b = 32335$: \quad $x_b = (0, 1)$
+\end{itemize}
+
+\subsubsection*{Calculul pas cu pas:}
+\begin{itemize}
+    \item \textbf{Pasul 1} (Câtul $q_0 = 1$): \\
+    $x_{20996} = (1, 0) - 1 \times (0, 1) = (1, -1)$
+    
+    \item \textbf{Pasul 2} (Câtul $q_1 = 1$): \\
+    $x_{11339} = (0, 1) - 1 \times (1, -1) = (-1, 2)$
+    
+    \item \textbf{Pasul 3} (Câtul $q_2 = 1$): \\
+    $x_{9657} = (1, -1) - 1 \times (-1, 2) = (2, -3)$
+    
+    \item \textbf{Pasul 4} (Câtul $q_3 = 1$): \\
+    $x_{1682} = (-1, 2) - 1 \times (2, -3) = (-3, 5)$
+    
+    \item \textbf{Pasul 5} (Câtul $q_4 = 5$): \\
+    $x_{1247} = (2, -3) - 5 \times (-3, 5) = (2 - (-15), -3 - 25) = (17, -28)$
+    
+    \item \textbf{Pasul 6} (Câtul $q_5 = 1$): \\
+    $x_{435} = (-3, 5) - 1 \times (17, -28) = (-20, 33)$
+    
+    \item \textbf{Pasul 7} (Câtul $q_6 = 2$): \\
+    $x_{377} = (17, -28) - 2 \times (-20, 33) = (17 - (-40), -28 - 66) = (57, -94)$
+    
+    \item \textbf{Pasul 8} (Câtul $q_7 = 1$): \\
+    $x_{58} = (-20, 33) - 1 \times (57, -94) = (-77, 127)$
+    
+    \item \textbf{Pasul 9} (Câtul $q_8 = 6$): \\
+    $x_{29} = (57, -94) - 6 \times (-77, 127) = (57 - (-462), -94 - 762) = (519, -856)$
+\end{itemize}
+
+\subsection*{ Centralizarea Datelor}
+
+Toate iterațiile pot fi sintetizate în următorul tabel de monitorizare a stării algoritmului:
+
+\begin{center}
+\begin{tabular}{crrrr}
+\toprule
+\textbf{Pasul ($i$)} & \textbf{Restul ($r_i$)} & \textbf{Câtul ($q_i$)} & \textbf{Coeficientul $u$} & \textbf{Coeficientul $v$} \\
+\midrule
+- & 53331 & - & 1 & 0 \\
+- & 32335 & 1 & 0 & 1 \\
+1 & 20996 & 1 & 1 & -1 \\
+2 & 11339 & 1 & -1 & 2 \\
+3 & 9657 & 1 & 2 & -3 \\
+4 & 1682 & 5 & -3 & 5 \\
+5 & 1247 & 1 & 17 & -28 \\
+6 & 435 & 2 & -20 & 33 \\
+7 & 377 & 1 & 57 & -94 \\
+8 & 58 & 6 & -77 & 127 \\
+\textbf{9} & \textbf{29} & 2 & \textbf{519} & \textbf{-856} \\
+10 & 0 & - & - & - \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection*{Concluzie }
+Coeficienții Bezout determinați sunt $\mathbf{u = 519}$ și $\mathbf{v = -856}$. Identitatea lui Bézout se scrie:
+\[
+29 = 519 \cdot 53331 + (-856) \cdot 32335
+\]
+
+
+\end{document}
